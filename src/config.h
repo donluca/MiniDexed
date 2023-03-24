@@ -70,6 +70,7 @@ public:
 	unsigned GetDACI2CAddress (void) const;		// 0 for auto probing
 	bool GetChannelsSwapped (void) const;
 	unsigned GetEngineType (void) const;
+    unsigned GetVelocityScale (void) const;
 
 	// MIDI
 	unsigned GetMIDIBaudRate (void) const;
@@ -152,6 +153,7 @@ private:
 	unsigned m_nDACI2CAddress;
 	bool m_bChannelsSwapped;
 	unsigned m_EngineType;
+    unsigned m_VelocityScale;
 
 	unsigned m_nMIDIBaudRate;
 	std::string m_MIDIThruIn;
