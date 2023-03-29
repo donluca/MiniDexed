@@ -549,15 +549,13 @@ void CUIMenu::EditProgramNumber (CUIMenu *pUIMenu, TMenuEvent Event)
 	case MenuEventStepDown:
 		if (--nValue < 0)
 		{
-			// Switch down a voice bank and set to the last voice
-			nValue = CSysExFileLoader::VoicesPerBank-1;
-			int nVB = pUIMenu->m_pMiniDexed->GetTGParameter(CMiniDexed::TGParameterVoiceBank, nTG);
-			if (--nVB < 0)
-			{
-				// Wrap around to last loaded bank
-				nVB = nLoadedBanks-1;
+			int nBank = pUIMenu->m_pMiniDexed->GetTGParameter (CMiniDexed::TGParameterVoiceBank, nTG);
+			if (nBank == 0) {
+				nValue = 0;
+			} else {
+				nValue = CSysExFileLoader::VoicesPerBank-1;
+				pUIMenu->m_pMiniDexed->SetTGParameter (CMiniDexed::TGParameterVoiceBank, nBank-1, nTG);
 			}
-			pUIMenu->m_pMiniDexed->SetTGParameter (CMiniDexed::TGParameterVoiceBank, nVB, nTG);
 		}
 		pUIMenu->m_pMiniDexed->SetTGParameter (CMiniDexed::TGParameterProgram, nValue, nTG);
 		break;
@@ -565,15 +563,13 @@ void CUIMenu::EditProgramNumber (CUIMenu *pUIMenu, TMenuEvent Event)
 	case MenuEventStepUp:
 		if (++nValue > (int) CSysExFileLoader::VoicesPerBank-1)
 		{
-			// Switch up a voice bank and reset to voice 0
-			nValue = 0;
-			int nVB = pUIMenu->m_pMiniDexed->GetTGParameter(CMiniDexed::TGParameterVoiceBank, nTG);
-			if (++nVB > (int) nLoadedBanks-1)
-			{
-				// Wrap around to first bank
-				nVB = 0;
+			int nBank = pUIMenu->m_pMiniDexed->GetTGParameter (CMiniDexed::TGParameterVoiceBank, nTG);
+			if (nBank == CSysExFileLoader::MaxVoiceBankID) {
+				nValue = CSysExFileLoader::VoicesPerBank-1;
+			} else {
+				nValue = 0;
+				pUIMenu->m_pMiniDexed->SetTGParameter (CMiniDexed::TGParameterVoiceBank, nBank+1, nTG);
 			}
-			pUIMenu->m_pMiniDexed->SetTGParameter (CMiniDexed::TGParameterVoiceBank, nVB, nTG);
 		}
 		pUIMenu->m_pMiniDexed->SetTGParameter (CMiniDexed::TGParameterProgram, nValue, nTG);
 		break;

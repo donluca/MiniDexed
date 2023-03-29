@@ -47,16 +47,7 @@ void CConfig::Load (void)
 	m_nDACI2CAddress = m_Properties.GetNumber ("DACI2CAddress", 0);
 	m_bChannelsSwapped = m_Properties.GetNumber ("ChannelsSwapped", 0) != 0;
 
-		unsigned newEngineType = m_Properties.GetNumber ("EngineType", 1);
-	if (newEngineType == 2) {
-  		m_EngineType = MKI;
-	} else if (newEngineType == 3) {
-  		m_EngineType = OPL;
-	} else {
-  		m_EngineType = MSFA;
-	}
-
-		unsigned newEngineType = m_Properties.GetNumber ("EngineType", 1);
+	unsigned newEngineType = m_Properties.GetNumber ("EngineType", 1);
 	if (newEngineType == 2) {
   		m_EngineType = MKI;
 	} else if (newEngineType == 3) {
