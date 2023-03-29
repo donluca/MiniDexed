@@ -538,6 +538,9 @@ void CUIMenu::EditProgramNumber (CUIMenu *pUIMenu, TMenuEvent Event)
 {
 	unsigned nTG = pUIMenu->m_nMenuStackParameter[pUIMenu->m_nCurrentMenuDepth-1];
 	int nLoadedBanks = pUIMenu->m_pMiniDexed->GetSysExFileLoader ()->GetNumLoadedBanks();
+	int nBank = pUIMenu->m_pMiniDexed->GetTGParameter (CMiniDexed::TGParameterVoiceBank, nTG);
+	string bankName = pUIMenu->m_pMiniDexed->GetSysExFileLoader ()->GetBankName (nBank).c_str ();
+
 
 	int nValue = pUIMenu->m_pMiniDexed->GetTGParameter (CMiniDexed::TGParameterProgram, nTG);
 
@@ -549,12 +552,13 @@ void CUIMenu::EditProgramNumber (CUIMenu *pUIMenu, TMenuEvent Event)
 	case MenuEventStepDown:
 		if (--nValue < 0)
 		{
-			int nBank = pUIMenu->m_pMiniDexed->GetTGParameter (CMiniDexed::TGParameterVoiceBank, nTG);
+			nBank = pUIMenu->m_pMiniDexed->GetTGParameter (CMiniDexed::TGParameterVoiceBank, nTG);
 			if (nBank == 0) {
 				nValue = 0;
 			} else {
 				nValue = CSysExFileLoader::VoicesPerBank-1;
 				pUIMenu->m_pMiniDexed->SetTGParameter (CMiniDexed::TGParameterVoiceBank, nBank-1, nTG);
+				bankName = pUIMenu->m_pMiniDexed->GetSysExFileLoader ()->GetBankName (nBank-1).c_str ();
 			}
 		}
 		pUIMenu->m_pMiniDexed->SetTGParameter (CMiniDexed::TGParameterProgram, nValue, nTG);
@@ -563,12 +567,13 @@ void CUIMenu::EditProgramNumber (CUIMenu *pUIMenu, TMenuEvent Event)
 	case MenuEventStepUp:
 		if (++nValue > (int) CSysExFileLoader::VoicesPerBank-1)
 		{
-			int nBank = pUIMenu->m_pMiniDexed->GetTGParameter (CMiniDexed::TGParameterVoiceBank, nTG);
+			nBank = pUIMenu->m_pMiniDexed->GetTGParameter (CMiniDexed::TGParameterVoiceBank, nTG);
 			if (nBank == CSysExFileLoader::MaxVoiceBankID) {
 				nValue = CSysExFileLoader::VoicesPerBank-1;
 			} else {
 				nValue = 0;
 				pUIMenu->m_pMiniDexed->SetTGParameter (CMiniDexed::TGParameterVoiceBank, nBank+1, nTG);
+				bankName = pUIMenu->m_pMiniDexed->GetSysExFileLoader ()->GetBankName (nBank+1).c_str ();
 			}
 		}
 		pUIMenu->m_pMiniDexed->SetTGParameter (CMiniDexed::TGParameterProgram, nValue, nTG);
@@ -586,10 +591,15 @@ void CUIMenu::EditProgramNumber (CUIMenu *pUIMenu, TMenuEvent Event)
 	string TG ("TG");
 	TG += to_string (nTG+1);
 
+	if (bankName.size() > 16)
+	{
+		bankName = bankName.substr(0,12) + "~" + bankName.substr(bankName.size() - 3);
+	}
+
 	string Value = to_string (nValue+1) + "=" + pUIMenu->m_pMiniDexed->GetVoiceName (nTG);
 
-	pUIMenu->m_pUI->DisplayWrite (TG.c_str (),
-				      pUIMenu->m_pParentMenu[pUIMenu->m_nCurrentMenuItem].Name,
+	pUIMenu->m_pUI->DisplayWrite ("",
+					  bankName.c_str(),
 				      Value.c_str (),
 				      nValue > 0, nValue < (int) CSysExFileLoader::VoicesPerBank-1);
 }
