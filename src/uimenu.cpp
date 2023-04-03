@@ -496,21 +496,25 @@ void CUIMenu::EditVoiceBankNumber (CUIMenu *pUIMenu, TMenuEvent Event)
 		break;
 
 	case MenuEventStepDown:
-		if (--nValue < 0)
-		{
+		if (--nValue < 0) {
 			nValue = 0;
+		} else {
+			pUIMenu->m_pMiniDexed->SetTGParameter (
+				CMiniDexed::TGParameterVoiceBank, nValue, nTG);
+			pUIMenu->m_pMiniDexed->SetTGParameter (
+				CMiniDexed::TGParameterProgram, 0, nTG);
 		}
-		pUIMenu->m_pMiniDexed->SetTGParameter (
-			CMiniDexed::TGParameterVoiceBank, nValue, nTG);
 		break;
 
 	case MenuEventStepUp:
-		if (++nValue > (int) nLoadedBanks-1)
-		{
+		if (++nValue > (int) nLoadedBanks-1) {
 			nValue = nLoadedBanks-1;
+		} else {
+			pUIMenu->m_pMiniDexed->SetTGParameter (
+				CMiniDexed::TGParameterVoiceBank, nValue, nTG);
+			pUIMenu->m_pMiniDexed->SetTGParameter (
+				CMiniDexed::TGParameterProgram, 0, nTG);
 		}
-		pUIMenu->m_pMiniDexed->SetTGParameter (
-			CMiniDexed::TGParameterVoiceBank, nValue, nTG);
 		break;
 
 	case MenuEventPressAndStepDown:
@@ -521,6 +525,8 @@ void CUIMenu::EditVoiceBankNumber (CUIMenu *pUIMenu, TMenuEvent Event)
 		}
 		pUIMenu->m_pMiniDexed->SetTGParameter (
 			CMiniDexed::TGParameterVoiceBank, nValue, nTG);
+		pUIMenu->m_pMiniDexed->SetTGParameter (
+				CMiniDexed::TGParameterProgram, 0, nTG);
 		break;
 
 	case MenuEventPressAndStepUp:
@@ -531,6 +537,8 @@ void CUIMenu::EditVoiceBankNumber (CUIMenu *pUIMenu, TMenuEvent Event)
 		}
 		pUIMenu->m_pMiniDexed->SetTGParameter (
 			CMiniDexed::TGParameterVoiceBank, nValue, nTG);
+		pUIMenu->m_pMiniDexed->SetTGParameter (
+				CMiniDexed::TGParameterProgram, 0, nTG);
 		break;
 
 	default:
