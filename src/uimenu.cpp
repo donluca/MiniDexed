@@ -600,6 +600,11 @@ void CUIMenu::EditProgramNumber (CUIMenu *pUIMenu, TMenuEvent Event)
 		pUIMenu->m_pMiniDexed->SetTGParameter (CMiniDexed::TGParameterProgram, nValue, nTG);
 		break;
 
+	case MenuEventSelect:
+		pUIMenu->m_pMiniDexed->SavePerformance (pUIMenu->m_nCurrentParameter == 1);
+		// CTimer::Get ()->StartKernelTimer (MSEC2HZ (1500), TimerHandler, 0, pUIMenu); // not necessary?
+		break;
+
 	case MenuEventPressAndStepDown:
 	case MenuEventPressAndStepUp:
 		pUIMenu->TGShortcutHandler (Event);
