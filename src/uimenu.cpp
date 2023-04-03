@@ -514,9 +514,24 @@ void CUIMenu::EditVoiceBankNumber (CUIMenu *pUIMenu, TMenuEvent Event)
 		break;
 
 	case MenuEventPressAndStepDown:
+		if (nValue-100 < 0) {
+			nValue = 0;
+		} else {
+			nValue = nValue-100;
+		}
+		pUIMenu->m_pMiniDexed->SetTGParameter (
+			CMiniDexed::TGParameterVoiceBank, nValue, nTG);
+		break;
+
 	case MenuEventPressAndStepUp:
-		pUIMenu->TGShortcutHandler (Event);
-		return;
+		if (nValue+100 > (int) nLoadedBanks-1) {
+			nValue = nLoadedBanks-1;
+		} else {
+			nValue = nValue+100;
+		}
+		pUIMenu->m_pMiniDexed->SetTGParameter (
+			CMiniDexed::TGParameterVoiceBank, nValue, nTG);
+		break;
 
 	default:
 		return;
