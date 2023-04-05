@@ -86,78 +86,26 @@ void CSysExFileLoader::Load (void)
 	m_nNumLoadedBanks = 0;
 
     DIR *pDirectory = opendir (m_DirName.c_str ());
-	if (!pDirectory)
-	{
-		LOGWARN ("Directory %s not found", m_DirName.c_str ());
-
-		return;
-	}
 
 	dirent *pEntry;
 	while ((pEntry = readdir (pDirectory)) != nullptr)
 	{
 		unsigned nBank;
-		size_t nLen = strlen (pEntry->d_name);
 
-		if (   nLen < 5						// "[NNNN]N[_name].syx"
-		    || strcasecmp (&pEntry->d_name[nLen-4], ".syx") != 0
-		    || sscanf (pEntry->d_name, "%u", &nBank) != 1)
-		{
-			LOGWARN ("%s: Invalid filename format", pEntry->d_name);
-
-			continue;
-		}
-
-		if (nBank > MaxVoiceBankID)
-		{
-			LOGWARN ("Bank #%u is not supported", nBank);
-
-			continue;
-		}
-
-		if (m_pVoiceBank[nBank])
-		{
-			LOGWARN ("Bank #%u already loaded", nBank);
-
-			continue;
-		}
+		sscanf (pEntry->d_name, "%u", &nBank);
 
 		m_pVoiceBank[nBank] = new TVoiceBank;
 		assert (m_pVoiceBank[nBank]);
 
-		std::string Filename (m_DirName);
-		Filename += "/";
-		Filename += pEntry->d_name;
+		std::string Filename (m_DirName + "/" + pEntry->d_name);
 
 		FILE *pFile = fopen (Filename.c_str (), "rb");
-		if (pFile)
-		{
-			if (   fread (m_pVoiceBank[nBank], sizeof (TVoiceBank), 1, pFile) == 1
-			    && m_pVoiceBank[nBank]->StatusStart == 0xF0
-			    && m_pVoiceBank[nBank]->CompanyID   == 0x43
-			    && m_pVoiceBank[nBank]->Format      == 0x09
-			    && m_pVoiceBank[nBank]->StatusEnd   == 0xF7)
-			{
-				LOGDBG ("Bank #%u successfully loaded", nBank);
+		fread (m_pVoiceBank[nBank], sizeof (TVoiceBank), 1, pFile);
+		
+		m_BankFileName[nBank] = pEntry->d_name;
+		m_nNumLoadedBanks++;
 
-				m_BankFileName[nBank] = pEntry->d_name;
-				m_nNumLoadedBanks++;
-			}
-			else
-			{
-				LOGWARN ("%s: Invalid size or format", Filename.c_str ());
-
-				delete m_pVoiceBank[nBank];
-				m_pVoiceBank[nBank] = nullptr;
-			}
-
-			fclose (pFile);
-		}
-		else
-		{
-			delete m_pVoiceBank[nBank];
-			m_pVoiceBank[nBank] = nullptr;
-		}
+		fclose (pFile);
 	}
 
 	closedir (pDirectory);
@@ -170,19 +118,15 @@ std::string CSysExFileLoader::GetBankName (unsigned nBankID)
 		std::string Result = m_BankFileName[nBankID];
 
 		size_t nLen = Result.length ();
-		if (nLen > 4)
-		{
-			Result.resize (nLen-4);		// remove file extension
 
-			unsigned nBank;
-			char BankName[30+1];
-			if (sscanf (Result.c_str (), "%u_%30s", &nBank, BankName) == 2)
-			{
-				Result = BankName;
+		Result.resize (nLen-4);		// remove file extension
 
-				return Result;
-			}
-		}
+		unsigned nBank;
+		char BankName[30+1];
+		sscanf (Result.c_str (), "%u_%30s", &nBank, BankName);
+		Result = BankName;
+
+		return Result;
 	}
 
 	return "NO NAME";
