@@ -24,6 +24,7 @@
 #include <string.h>
 #include <strings.h>
 #include <assert.h>
+#include <sys/time.h>
 #include <circle/logger.h>
 #include "voices.c"
 
@@ -65,7 +66,7 @@ CSysExFileLoader::CSysExFileLoader (const char *pDirName)
 :	m_DirName (pDirName)
 {
 	m_DirName += "/voice";
-	m_nNumLoadedBanks = 0;
+	m_nNumHighestBank = 0;
 
 	for (unsigned i = 0; i <= MaxVoiceBankID; i++)
 	{
@@ -83,32 +84,82 @@ CSysExFileLoader::~CSysExFileLoader (void)
 
 void CSysExFileLoader::Load (void)
 {
-	m_nNumLoadedBanks = 0;
+	LOGDBG ("Start loading banks");
+	struct timeval begin, end;
+    gettimeofday(&begin, 0);
+	m_nNumHighestBank = 0;
+	m_nBanksLoaded = 0;
 
     DIR *pDirectory = opendir (m_DirName.c_str ());
+	if (!pDirectory) {
+		return;
+	}
 
 	dirent *pEntry;
 	while ((pEntry = readdir (pDirectory)) != nullptr)
 	{
-		unsigned nBank;
+		LoadBank(m_DirName.c_str (), pEntry->d_name);
+	}
+	closedir (pDirectory);
+	gettimeofday(&end, 0);
+	long seconds = end.tv_sec - begin.tv_sec;
+    long microseconds = end.tv_usec - begin.tv_usec;
+    double elapsed = seconds + microseconds*1e-6;
+	LOGDBG ("Banks loaded in %.3f seconds", elapsed);
+}
 
-		sscanf (pEntry->d_name, "%u", &nBank);
+void CSysExFileLoader::LoadBank (const char * sDirName, const char * sBankName)
+{
+	unsigned nBank;
+	size_t nLen = strlen (sBankName);
 
-		m_pVoiceBank[nBank] = new TVoiceBank;
-		assert (m_pVoiceBank[nBank]);
+	if (   nLen < 5						// "[NNNN]N[_name].syx"
+		|| strcasecmp (&sBankName[nLen-4], ".syx") != 0
+		|| sscanf (sBankName, "%u", &nBank) != 1)
+	{
+		// See if this is a subdirectory...
+		std::string Dirname (sDirName);
+		Dirname += "/";
+		Dirname += sBankName;
 
-		std::string Filename (m_DirName + "/" + pEntry->d_name);
+		DIR *pDirectory = opendir (Dirname.c_str ());
+		if (pDirectory)
+		{
+			dirent *pEntry;
+			while ((pEntry = readdir (pDirectory)) != nullptr) {
+				LoadBank(Dirname.c_str (), pEntry->d_name);
+			}
+			closedir (pDirectory);
+		}
+		return;
+	}
 
-		FILE *pFile = fopen (Filename.c_str (), "rb");
+	m_pVoiceBank[nBank] = new TVoiceBank;
+	assert (m_pVoiceBank[nBank]);
+
+	std::string Filename (sDirName);
+	Filename += "/";
+	Filename += sBankName;
+
+	FILE *pFile = fopen (Filename.c_str (), "rb");
+	if (pFile)
+	{
 		fread (m_pVoiceBank[nBank], sizeof (TVoiceBank), 1, pFile);
 		
-		m_BankFileName[nBank] = pEntry->d_name;
-		m_nNumLoadedBanks++;
+		m_BankFileName[nBank] = sBankName;
+		m_nBanksLoaded++;
+
+		if (m_nBanksLoaded % 100 == 0) {
+			LOGDBG ("%u banks loaded", m_nBanksLoaded);
+		}
 
 		fclose (pFile);
 	}
-
-	closedir (pDirectory);
+	else
+	{
+		delete m_pVoiceBank[nBank];
+		m_pVoiceBank[nBank] = nullptr;
+	}
 }
 
 std::string CSysExFileLoader::GetBankName (unsigned nBankID)
@@ -134,7 +185,7 @@ std::string CSysExFileLoader::GetBankName (unsigned nBankID)
 
 unsigned CSysExFileLoader::GetNumLoadedBanks (void)
 {
-	return m_nNumLoadedBanks;
+	return m_nBanksLoaded;
 }
 
 void CSysExFileLoader::GetVoice (unsigned nBankID, unsigned nVoiceID, uint8_t *pVoiceData)

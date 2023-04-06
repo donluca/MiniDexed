@@ -69,12 +69,15 @@ private:
 private:
 	std::string m_DirName;
 	
-	unsigned m_nNumLoadedBanks;
+	unsigned m_nNumHighestBank;
+	unsigned m_nBanksLoaded;
 
 	TVoiceBank *m_pVoiceBank[MaxVoiceBankID+1];
 	std::string m_BankFileName[MaxVoiceBankID+1];
 
 	static uint8_t s_DefaultVoice[SizeSingleVoice];
+	
+	void LoadBank (const char * sDirName, const char * sBankName);
 };
 
 #endif
