@@ -149,10 +149,6 @@ void CSysExFileLoader::LoadBank (const char * sDirName, const char * sBankName)
 		m_BankFileName[nBank] = sBankName;
 		m_nBanksLoaded++;
 
-		if (m_nBanksLoaded % 100 == 0) {
-			LOGDBG ("%u banks loaded", m_nBanksLoaded);
-		}
-
 		fclose (pFile);
 	}
 	else
