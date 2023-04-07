@@ -36,17 +36,17 @@ public:
 
 	struct TVoiceBank
 	{
-		uint8_t StatusStart;	// 0xF0
+		/* uint8_t StatusStart;	// 0xF0
 		uint8_t CompanyID;	// 0x43
 		uint8_t SubStatus;	// 0x00
 		uint8_t Format;		// 0x09
 		uint8_t ByteCountMS;	// 0x20
-		uint8_t ByteCountLS;	// 0x00
+		uint8_t ByteCountLS;	// 0x00 */
 
 		uint8_t Voice[VoicesPerBank][SizePackedVoice];
 
-		uint8_t Checksum;
-		uint8_t StatusEnd;	// 0xF7
+		/* uint8_t Checksum;
+		uint8_t StatusEnd;	// 0xF7 */
 	}
 	PACKED;
 
