@@ -621,7 +621,8 @@ void CUIMenu::EditProgramNumber (CUIMenu *pUIMenu, TMenuEvent Event)
 		|| voiceName == "init voice" 
 	    || voiceName == "          " 
 	    || voiceName == "----------" 
-	    || voiceName == "~~~~~~~~~~" ) 
+	    || voiceName == "~~~~~~~~~~"
+		|| voiceName == "EMPTY     " ) 
 	{
 		if (Event == MenuEventStepUp) {
 			CUIMenu::EditProgramNumber (pUIMenu, MenuEventStepUp);
